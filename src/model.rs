@@ -22,12 +22,7 @@ pub mod obj {
     pub fn load( display: &glium::Display, path: &str )
         -> Result<Model, LoadError>
     {
-        let load_options
-          = tobj::LoadOptions { merge_identical_points: true,
-                                triangulate:            true,
-                                .. Default::default()         };
-        let load_result
-          = tobj::load_obj( path, &load_options );
+        let load_result = tobj::load_obj( path, &tobj::GPU_LOAD_OPTIONS );
 
         let (tobj_models, materials_result) = load_result?;
         let materials = materials_result?;
@@ -40,21 +35,15 @@ pub mod obj {
     impl From<&tobj::Mesh>
     for Mesh {
         fn from(src: &tobj::Mesh) -> Self {
-            let mut dst = Mesh {
-                vertices: vec![Default::default(); src.positions.len() / 3],
-                indices:  src.indices.clone(),
-            };
-
-            for (&i, &n) in std::iter::zip(&src.indices, &src.normal_indices) {
-                let (i, p, n) = (i as usize, i as usize * 3, n as usize * 3);
-
-                dst.vertices[i] = Vertex {
-                    a_position: src.positions[p..p+3].try_into().unwrap(),
-                    a_normal:   src.normals[n..n+3].try_into().unwrap(),
-                };
+            Mesh {
+                vertices:
+                    src.positions.chunks_exact(3)
+                     . zip( src.normals.chunks_exact(3) )
+                     . map(|(p, n)| Vertex{ a_position: p.try_into().unwrap(),
+                                            a_normal:   n.try_into().unwrap() })
+                     . collect(),
+                indices: src.indices.clone(),
             }
-
-            dst
         }
     }
 

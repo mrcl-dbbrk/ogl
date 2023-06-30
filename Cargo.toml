@@ -10,7 +10,7 @@ env_logger = "0.10.0"
 glium = "0.32.1"
 image = "0.24.6"
 rand = "0.8.5"
-tobj = {version = "3.2.4", features = ["log", "merging"]}
+tobj = {version = "3.2.4", features = ["log", "merging", "reordering"]}
 
 [features]
 log = []
