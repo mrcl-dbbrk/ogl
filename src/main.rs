@@ -196,8 +196,10 @@ impl State {
 /******************************************************************************/
 /* main */
 
-fn main() {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     env_logger::init();
+    let file_path
+      = &std::env::args().nth(1).ok_or("You need to provide a file.")?;
     let main_loop = event_loop::EventLoop::new();
     let display = glium::Display::new(
         glium::glutin::window::WindowBuilder::new(),
@@ -212,7 +214,7 @@ fn main() {
         keys_pressed: std::collections::HashSet::new(),
         keys_released: std::collections::HashSet::new(),
         last_updated: std::time::Instant::now(),
-        model: model::obj::load(&display, "assets/OBJ/default.obj").unwrap(),
+        model: model::obj::load(&display, file_path)?,
         shape: 0,
         display: display,
         position: V([0.0, 0.0, 0.0]),
